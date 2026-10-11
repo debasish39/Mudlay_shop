@@ -43,6 +43,14 @@ import {
 
 } from "react-icons/lu";
 
+import {
+  FaInstagram,
+  FaFacebookF,
+  FaYoutube,
+  FaPinterestP,
+  FaWhatsapp,
+} from "react-icons/fa";
+
 import AOS from "aos";
 
 import "aos/dist/aos.css";
@@ -159,6 +167,11 @@ function getProductImage(product) {
   return getProductImages(product)[0] || "";
 }
 
+function getProductPageUrl(product) {
+  const baseUrl = window.location.origin;
+  return `${baseUrl}/product/${encodeURIComponent(String(product?._id || ""))}`;
+}
+
 function normalizeProduct(product) {
   const images = getProductImages(product);
 
@@ -261,6 +274,7 @@ function SingleProductPage({
   onFavorite,
   favorite,
   onShare,
+  onEnquire,
   relatedProducts,
   onOpenProduct,
 }) {
@@ -385,13 +399,37 @@ function SingleProductPage({
               <button type="button" onClick={() => onFavorite(product._id)} aria-pressed={favorite} aria-label={favorite ? "Remove from wishlist" : "Add to wishlist"} className={`grid h-12 w-12 place-items-center rounded-xl border transition ${favorite ? "border-rose-200 bg-rose-50 text-rose-500" : "border-black/[.1] bg-white hover:bg-[#eceee3]"}`}><LuHeart size={19} fill={favorite ? "#f43f5e" : "none"} /></button>
             </div>
             <button type="button" onClick={() => onShare(product)} className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-black/[.1] bg-white text-sm font-bold transition hover:bg-[#eceee3]"><LuShare2 size={17} /> Share this product</button>
+            <button type="button" onClick={() => onEnquire(product, selectedSize, selectedColor)} className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-5 text-sm font-bold text-white transition hover:bg-[#1fb957] active:scale-[.99]"><FaWhatsapp size={19} /> Enquire about this product</button>
             <div className="mt-6 grid grid-cols-2 gap-3"><div className="rounded-2xl border border-black/[.06] bg-white p-4"><LuMessageCircle size={18} className="text-[#526b43]" /><p className="mt-2 text-xs font-bold">Personal assistance</p><p className="mt-1 text-[10px] leading-5 text-[#85877b]">Ask us about fit, size and availability.</p></div><div className="rounded-2xl border border-black/[.06] bg-white p-4"><LuTruck size={18} className="text-[#526b43]" /><p className="mt-2 text-xs font-bold">Delivery details</p><p className="mt-1 text-[10px] leading-5 text-[#85877b]">Delivery charges confirmed by the shop.</p></div></div>
           </section>
         </div>
 
         {relatedProducts.length > 0 && <section className="mt-14 border-t border-black/[.06] pt-9"><div className="flex items-end justify-between gap-4"><div><p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#82936d]">More to discover</p><h2 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">You may also like.</h2></div><button type="button" onClick={onBack} className="text-xs font-bold underline underline-offset-4">Shop all</button></div><div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">{relatedProducts.slice(0, 4).map((item) => { const photo = getProductImage(item); return <button key={item._id} type="button" onClick={() => onOpenProduct(item)} className="overflow-hidden rounded-2xl border border-black/[.06] bg-white text-left transition hover:-translate-y-1"><div className="aspect-[4/5] bg-[#eceee3]"><img src={photo || undefined} alt={item.name || "Product"} loading="lazy" className="h-full w-full object-cover" /></div><div className="p-3"><p className="line-clamp-2 text-xs font-bold">{item.name}</p><p className="mt-2 text-sm font-black text-[#283d2d]">{money(item.price)}</p></div></button>; })}</div></section>}
       </main>
-      <footer className="mt-10 bg-[#202d22] px-4 py-7 text-center text-[10px] text-white/60">© {new Date().getFullYear()} Mudlay. All rights reserved.</footer>
+      <footer className="mt-10 bg-[#202d22] px-5 py-8 text-white sm:px-8">
+        <div className="mx-auto flex max-w-[1280px] flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xl font-black">mudlay<span className="text-[#dce6c5]">.</span></p>
+            <p className="mt-1 text-[10px] text-white/55">Wear your everyday</p>
+          </div>
+          <div>
+            <p className="mb-3 text-xs font-bold">Follow Mudlay</p>
+            <div className="flex gap-3">
+              {[
+                { name: "Instagram", url: import.meta.env.VITE_INSTAGRAM_URL, Icon: FaInstagram },
+                { name: "Facebook", url: import.meta.env.VITE_FACEBOOK_URL, Icon: FaFacebookF },
+                { name: "YouTube", url: import.meta.env.VITE_YOUTUBE_URL, Icon: FaYoutube },
+                { name: "Pinterest", url: import.meta.env.VITE_PINTEREST_URL, Icon: FaPinterestP },
+              ].map(({ name, url, Icon }) => (
+                <a key={name} href={url || undefined} target={url ? "_blank" : undefined} rel={url ? "noopener noreferrer" : undefined} aria-label={name} title={url ? name : `${name} link not configured`} onClick={(event) => { if (!url) { event.preventDefault(); } }} className="grid h-10 w-10 place-items-center rounded-full border border-white/15 bg-white/[.06] transition hover:bg-white/15">
+                  <Icon size={17} />
+                </a>
+              ))}
+            </div>
+          </div>
+          <p className="text-[10px] text-white/50">© {new Date().getFullYear()} Mudlay. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }
@@ -1005,62 +1043,87 @@ export default function App() {
     }
   }
 
-  function checkout() {
-
-    if (!cart.length) return;
+  function enquireProduct(product, selectedSize = "", selectedColor = "") {
+    if (!product) return;
 
     if (whatsapp.length < 10) {
-
       setNotice("Add your shop WhatsApp number to the .env file.");
-
       return;
-
     }
 
-    const items = cart
-
-      .map(
-
-        ({ product, qty }) =>
-
-          `• ${product.name}${[product.selectedSize ? `Size: ${product.selectedSize}` : "", product.selectedColor ? `Colour: ${product.selectedColor}` : ""].filter(Boolean).length ? ` (${[product.selectedSize ? `Size: ${product.selectedSize}` : "", product.selectedColor ? `Colour: ${product.selectedColor}` : ""].filter(Boolean).join(", ")})` : ""} × ${qty} — ${money(
-
-            Number(product.price) * qty
-
-          )}`
-
-      )
-
-      .join("\n");
-
+    const productUrl = getProductPageUrl(product);
+    const image = getProductImage(product);
     const message = [
-
-      "Hello Mudlay! I'd like to enquire about these products:",
-
+      "Hello Mudlay! 👋",
+      "I'd like to enquire about this product.",
       "",
-
-      items,
-
+      `Product: ${product.name || "Product"}`,
+      `Category: ${product.category || "Collection"}`,
+      `Price: ${money(product.price)}`,
+      `Size: ${selectedSize || "Please confirm availability"}`,
+      `Colour: ${selectedColor || "Please confirm availability"}`,
+      `Product link: ${productUrl}`,
+      `Product image: ${image || "Image unavailable"}`,
       "",
-
-      `Estimated subtotal: ${money(cartTotal)}`,
-
-      "",
-
-      "Please confirm availability, sizes, delivery charges and the final amount.",
-
+      "Please confirm availability, delivery charges and the final price.",
     ].join("\n");
 
     window.open(
-
       `https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}`,
-
       "_blank",
-
       "noopener,noreferrer"
-
     );
+  }
 
+  function checkout() {
+    if (!cart.length) return;
+
+    if (whatsapp.length < 10) {
+      setNotice("Add your shop WhatsApp number to the .env file.");
+      return;
+    }
+
+    const productMessages = cart.map(({ product, qty }, index) => {
+      const productUrl = getProductPageUrl(product);
+      const image = getProductImage(product);
+      const itemSubtotal = Number(product.price || 0) * Number(qty || 0);
+      const options = [
+        product.selectedSize ? `Size: ${product.selectedSize}` : "",
+        product.selectedColor ? `Colour: ${product.selectedColor}` : "",
+      ].filter(Boolean);
+
+      return [
+        `${index + 1}. ${product.name || "Product"}`,
+        `Category: ${product.category || "Collection"}`,
+        `Price per item: ${money(product.price)}`,
+        `Quantity: ${qty}`,
+        ...options,
+        `Item subtotal: ${money(itemSubtotal)}`,
+        `Product link: ${productUrl}`,
+        `Product image: ${image || "Image unavailable"}`,
+      ].join("\n");
+    });
+
+    const message = [
+      "Hello Mudlay! 👋",
+      "I'd like to enquire about these products from my bag:",
+      "",
+      ...productMessages.flatMap((item) => [item, ""]),
+      "-------------------------",
+      `Total items: ${cartCount}`,
+      `Estimated subtotal: ${money(cartTotal)}`,
+      "",
+      "Please confirm product availability, size and colour availability, delivery charges, estimated delivery time, and the final payable amount.",
+      "",
+      "Thank you!",
+      "Sent from the Mudlay online store.",
+    ].join("\n");
+
+    window.open(
+      `https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
   }
 
   if (adminOpen) return <Admin onBack={goStore} />;
@@ -1085,6 +1148,7 @@ export default function App() {
         onFavorite={toggleFavorite}
         favorite={favorites.some((id) => String(id) === String(selectedProductId))}
         onShare={shareProduct}
+        onEnquire={enquireProduct}
         relatedProducts={relatedProducts.length ? relatedProducts : products.filter((item) => String(item._id) !== String(selectedProductId))}
         onOpenProduct={openProduct}
       />
@@ -1739,7 +1803,7 @@ export default function App() {
         {/* Editorial hero — image-first, bottom-aligned copy */}
         <section className="mudlay-hero relative isolate min-h-[610px] overflow-hidden bg-[#152319] text-white sm:min-h-[700px] lg:min-h-[760px]">
           <img
-            src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=2200&q=90"
+            src="https://www.shreekama.com/cdn/shop/articles/afe918ae727d5c6eca605ffe02e258c9.png?v=1768048615&width=1100" 
             alt="Contemporary everyday fashion editorial"
             fetchPriority="high"
             className="mudlay-hero-image absolute inset-0 h-full w-full object-cover object-center"
@@ -2301,7 +2365,7 @@ export default function App() {
 
           ) : filtered.length ? (
 
-            <div className="mt-3 grid grid-cols-2 gap-2 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            <div className="mt-3 grid grid-cols-2 gap-1 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
 
               {filtered.map((product, index) => (
 
@@ -2349,15 +2413,7 @@ export default function App() {
                     onViewProduct={openProduct}
 
                   />
-                  <button
-                    type="button"
-                    aria-label={`Share ${product.name || "product"}`}
-                    title="Share product"
-                    onClick={() => shareProduct(product)}
-                    className="absolute left-3 top-3 z-20 grid h-9 w-9 place-items-center rounded-full border border-black/[.06] bg-white/95 text-[#283d2d] shadow-sm backdrop-blur transition hover:scale-105 hover:bg-[#dce6c5] active:scale-95 sm:left-3.5 sm:top-3.5 sm:h-10 sm:w-10"
-                  >
-                    <LuShare2 size={17} />
-                  </button>
+                
                 </div>
 
               ))}
@@ -2646,6 +2702,36 @@ export default function App() {
 
             </div>
 
+          </div>
+
+          <div>
+            <p className="mb-3 text-xs font-bold">Follow Mudlay</p>
+            <div className="flex gap-3">
+              {[
+                { name: "Instagram", url: import.meta.env.VITE_INSTAGRAM_URL, Icon: FaInstagram },
+                { name: "Facebook", url: import.meta.env.VITE_FACEBOOK_URL, Icon: FaFacebookF },
+                { name: "YouTube", url: import.meta.env.VITE_YOUTUBE_URL, Icon: FaYoutube },
+                { name: "Pinterest", url: import.meta.env.VITE_PINTEREST_URL, Icon: FaPinterestP },
+              ].map(({ name, url, Icon }) => (
+                <a
+                  key={name}
+                  href={url || undefined}
+                  target={url ? "_blank" : undefined}
+                  rel={url ? "noopener noreferrer" : undefined}
+                  aria-label={name}
+                  title={url ? name : `${name} link not configured`}
+                  onClick={(event) => {
+                    if (!url) {
+                      event.preventDefault();
+                      setNotice(`Add your ${name} URL to the .env file.`);
+                    }
+                  }}
+                  className="grid h-10 w-10 place-items-center rounded-full border border-white/15 bg-white/[.06] transition hover:bg-white/15"
+                >
+                  <Icon size={17} />
+                </a>
+              ))}
+            </div>
           </div>
 
           <p className="text-xs text-white/50">

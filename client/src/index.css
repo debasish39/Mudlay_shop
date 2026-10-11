@@ -1,0 +1,6 @@
+@import "tailwindcss"; :root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#20251f;background:#f8f5ef;font-synthesis:none;text-rendering:optimizeLegibility}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-width:320px}button,input,select,textarea{font:inherit}button{cursor:pointer}
+
+/* Accessible, touch-friendly motion and mobile spacing */
+:focus-visible{outline:3px solid #9aaa72;outline-offset:3px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+[data-aos]{will-change:transform,opacity}

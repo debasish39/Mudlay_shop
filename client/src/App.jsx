@@ -1450,7 +1450,7 @@ export default function App() {
 
       {/* Announcement strip */}
 
-      <div className="mudlay-shine bg-[#283d2d] px-3 py-2.5 text-center text-[9px] font-semibold uppercase tracking-[.17em] text-white sm:text-[10px]">
+      <div className="mudlay-shine bg-[#283d2d] px-3 py-2.5 text-center text-[7px] font-semibold uppercase tracking-[.17em] text-white sm:text-[10px]">
 
         <span className="relative z-10">
 

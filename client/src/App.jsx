@@ -1813,7 +1813,7 @@ export default function App() {
 
           <div className="relative mx-auto flex min-h-[610px] max-w-[1480px] flex-col justify-between px-4 pb-8 pt-7 sm:min-h-[700px] sm:px-6 sm:pb-12 sm:pt-9 lg:min-h-[760px] lg:px-10 lg:pb-16">
             <div className="flex items-start justify-between gap-4">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/15 px-3.5 py-2 text-[9px] font-bold uppercase tracking-[.18em] text-white/90 backdrop-blur-md sm:text-[10px]">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/15 px-3.5  mt-15 py-2 text-[9px] font-bold uppercase tracking-[.18em] text-white/90 backdrop-blur-md sm:text-[10px]">
                 <span className="h-2 w-2 rounded-full bg-[#dce6c5]" />
                 The everyday collection
               </span>
